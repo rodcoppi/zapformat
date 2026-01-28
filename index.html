@@ -610,44 +610,28 @@
 
         // Track first format and increment counter
         let hasFormatted = false;
+        const COUNTER_TOKEN = 'ut_cEcjRQq1SJEH0P4bE8PzfD1LQI3V9qH43CzpEa6V';
 
-        // Load initial count - use info endpoint which auto-creates
-        fetch('https://api.countapi.xyz/info/zapformat/users')
+        // Load initial count
+        fetch(`https://api.countapi.io/get/${COUNTER_TOKEN}`)
             .then(res => res.json())
             .then(data => {
-                if (data.value !== undefined) {
-                    document.getElementById('usageCount').textContent = data.value.toLocaleString();
-                } else {
-                    // Key doesn't exist, create it
-                    return fetch('https://api.countapi.xyz/create?namespace=zapformat&key=users&value=0')
-                        .then(res => res.json())
-                        .then(() => {
-                            document.getElementById('usageCount').textContent = '0';
-                        });
+                if (data.count !== undefined) {
+                    document.getElementById('usageCount').textContent = data.count.toLocaleString();
                 }
             })
             .catch(() => {
-                // Try to get current value anyway
-                fetch('https://api.countapi.xyz/get/zapformat/users')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.value !== undefined) {
-                            document.getElementById('usageCount').textContent = data.value.toLocaleString();
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('usageCount').textContent = '0';
-                    });
+                document.getElementById('usageCount').textContent = '---';
             });
 
         function incrementUsageCounter() {
             if (!hasFormatted) {
                 hasFormatted = true;
-                fetch('https://api.countapi.xyz/hit/zapformat/users')
+                fetch(`https://api.countapi.io/hit/${COUNTER_TOKEN}`)
                     .then(res => res.json())
                     .then(data => {
-                        if (data.value !== undefined) {
-                            document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                        if (data.count !== undefined) {
+                            document.getElementById('usageCount').textContent = data.count.toLocaleString();
                         }
                     })
                     .catch(() => {});
