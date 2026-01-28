@@ -62,6 +62,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .subtitle {
@@ -213,7 +214,7 @@
             }
         }
 
-        .btn-copy {
+        .btn-copy, .btn-whatsapp {
             padding: 6px 14px;
             background: transparent;
             color: #fff;
@@ -225,7 +226,7 @@
             transition: all 0.2s;
         }
 
-        .btn-copy:hover {
+        .btn-copy:hover, .btn-whatsapp:hover {
             background: #1f1f1f;
             border-color: #4a4a4a;
         }
@@ -234,6 +235,22 @@
             background: #27ae60;
             border-color: #27ae60;
             color: #fff;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            border-color: #25D366;
+            color: #fff;
+        }
+
+        .btn-whatsapp:hover {
+            background: #20BA5A;
+            border-color: #20BA5A;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
         }
 
         .btn-clear {
@@ -313,6 +330,27 @@
             gap: 20px;
             font-size: 0.85rem;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .usage-counter {
+            color: #666;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .usage-counter .count {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .usage-counter {
+                display: none;
+            }
         }
 
         .bookmark-btn {
@@ -365,6 +403,7 @@
                     <h1>
                         <span id="title">Zapformat</span>
                         <button class="bookmark-btn" id="bookmarkBtn" onclick="showBookmarkInstructions()">⭐ Bookmark</button>
+                        <span class="usage-counter">🔥 <span class="count" id="usageCount">---</span> <span id="usageLabel">users already used</span></span>
                     </h1>
                     <p class="subtitle" id="subtitle">Ever tried copying text from Gemini or ChatGPT to WhatsApp and noticed it comes out as a visual mess? Yeah, me too! That's why I built this—paste your AI response here as-is, and copy the clean, WhatsApp-ready version.</p>
                 </div>
@@ -413,7 +452,10 @@
                         <span id="outputLabel">Output</span>
                         <span class="pill" id="pillText">you can edit before copy if you want!</span>
                     </div>
-                    <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">Copy</button>
+                    <div class="btn-group">
+                        <button class="btn-whatsapp" id="whatsappBtn" onclick="sendToWhatsApp()">📱 WhatsApp</button>
+                        <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">Copy</button>
+                    </div>
                 </div>
                 <textarea id="output" placeholder="Formatted text will appear here..."></textarea>
             </div>
@@ -443,6 +485,7 @@
                 inputLabel: "Input",
                 outputLabel: "Output",
                 pillText: "you can edit before copy if you want!",
+                whatsappBtn: "📱 WhatsApp",
                 copyBtn: "Copy",
                 copiedBtn: "✓ Copied",
                 clearBtn: "Clear all",
@@ -453,7 +496,8 @@
                 opensourceBadge: 'Open Source',
                 githubLink: 'GitHub',
                 bookmarkBtn: '⭐ Bookmark',
-                bookmarkMsg: 'Press Ctrl+D (Windows/Linux) or Cmd+D (Mac) to bookmark this page!'
+                bookmarkMsg: 'Press Ctrl+D (Windows/Linux) or Cmd+D (Mac) to bookmark this page!',
+                usageLabel: 'users already used'
             },
             pt: {
                 title: "Zapformat",
@@ -461,6 +505,7 @@
                 inputLabel: "Entrada",
                 outputLabel: "Saída",
                 pillText: "você pode editar antes de copiar se quiser!",
+                whatsappBtn: "📱 WhatsApp",
                 copyBtn: "Copiar",
                 copiedBtn: "✓ Copiado",
                 clearBtn: "Limpar tudo",
@@ -471,7 +516,8 @@
                 opensourceBadge: 'Código Aberto',
                 githubLink: 'GitHub',
                 bookmarkBtn: '⭐ Favoritar',
-                bookmarkMsg: 'Pressione Ctrl+D (Windows/Linux) ou Cmd+D (Mac) para adicionar aos favoritos!'
+                bookmarkMsg: 'Pressione Ctrl+D (Windows/Linux) ou Cmd+D (Mac) para adicionar aos favoritos!',
+                usageLabel: 'usuários já usaram'
             }
         };
 
@@ -501,6 +547,7 @@
             document.getElementById('inputLabel').textContent = t.inputLabel;
             document.getElementById('outputLabel').textContent = t.outputLabel;
             document.getElementById('pillText').textContent = t.pillText;
+            document.getElementById('whatsappBtn').textContent = t.whatsappBtn;
             document.getElementById('copyBtn').textContent = t.copyBtn;
             document.getElementById('clearBtn').textContent = t.clearBtn;
             document.getElementById('input').placeholder = t.inputPlaceholder;
@@ -509,7 +556,33 @@
             document.getElementById('opensourceBadge').textContent = t.opensourceBadge;
             document.getElementById('githubLink').textContent = t.githubLink;
             document.getElementById('bookmarkBtn').textContent = t.bookmarkBtn;
+            document.getElementById('usageLabel').textContent = t.usageLabel;
             document.getElementById('about').innerHTML = t.about;
+        }
+
+        // Track first format and increment counter
+        let hasFormatted = false;
+
+        // Load initial count
+        fetch('https://api.countapi.xyz/get/zapformat/users')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('usageCount').textContent = data.value.toLocaleString();
+            })
+            .catch(() => {
+                document.getElementById('usageCount').textContent = '---';
+            });
+
+        function incrementUsageCounter() {
+            if (!hasFormatted) {
+                hasFormatted = true;
+                fetch('https://api.countapi.xyz/hit/zapformat/users')
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                    })
+                    .catch(() => {});
+            }
         }
 
         function showBookmarkInstructions() {
@@ -526,6 +599,9 @@
                 document.getElementById('output').value = '';
                 return;
             }
+
+            // Increment counter on first format
+            incrementUsageCounter();
 
             // Preserve code blocks temporarily to avoid breaking their content
             const codeBlocks = [];
@@ -579,6 +655,22 @@
             text = text.trim();
 
             document.getElementById('output').value = text;
+        }
+
+        function sendToWhatsApp() {
+            const output = document.getElementById('output');
+            const text = output.value;
+
+            if (!text.trim()) {
+                const lang = document.querySelector('input[name="language"]:checked').value;
+                const msg = lang === 'pt' ? 'Nenhum texto formatado para enviar!' : 'No formatted text to send!';
+                alert(msg);
+                return;
+            }
+
+            // Open WhatsApp with the formatted text
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(whatsappUrl, '_blank');
         }
 
         function copyToClipboard() {
