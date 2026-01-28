@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp AI Copy/Paster Formatter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 35px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left h1 {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .lang-selector {
+            display: flex;
+            gap: 8px;
+            background: #1a1a1a;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .lang-option input[type="radio"] {
+            display: none;
+        }
+
+        .lang-option label {
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            color: #888;
+            user-select: none;
+        }
+
+        .lang-option input[type="radio"]:checked + label {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .ai-selector {
+            display: flex;
+            gap: 8px;
+            background: #1a1a1a;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .ai-option input[type="radio"] {
+            display: none;
+        }
+
+        .ai-option label {
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            color: #888;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+        }
+
+        .ai-option input[type="radio"]:checked + label {
+            background: #fff;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 968px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .editor-box {
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2a2a2a;
+            background: #0f0f0f;
+        }
+
+        .editor-label {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill {
+            background: #2a2a2a;
+            color: #888;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .pill {
+                display: none;
+            }
+        }
+
+        .btn-copy {
+            padding: 6px 14px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid #3a3a3a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: #1f1f1f;
+            border-color: #4a4a4a;
+        }
+
+        .btn-copy.copied {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: #fff;
+        }
+
+        .btn-clear {
+            padding: 6px 14px;
+            background: transparent;
+            color: #888;
+            border: 1px solid #2a2a2a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        textarea {
+            width: 100%;
+            height: 450px;
+            background: transparent;
+            border: none;
+            padding: 16px;
+            color: #e0e0e0;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: #444;
+        }
+
+        .about {
+            text-align: center;
+            margin-top: 40px;
+            padding: 12px 16px;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #666;
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .about strong {
+            color: #888;
+            display: inline;
+            margin-right: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="header-left">
+                    <h1 id="title">WhatsApp AI Copy/Paster Formatter</h1>
+                    <p class="subtitle" id="subtitle">Convert AI responses to WhatsApp format</p>
+                </div>
+                <div class="lang-selector">
+                    <div class="lang-option">
+                        <input type="radio" id="lang-en" name="language" value="en" checked>
+                        <label for="lang-en">EN</label>
+                    </div>
+                    <div class="lang-option">
+                        <input type="radio" id="lang-pt" name="language" value="pt">
+                        <label for="lang-pt">PT-BR</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-selector">
+                <div class="ai-option">
+                    <input type="radio" id="gemini" name="ai-source" value="gemini" checked>
+                    <label for="gemini">
+                        <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini" class="ai-icon">
+                        Gemini
+                    </label>
+                </div>
+                <div class="ai-option">
+                    <input type="radio" id="chatgpt" name="ai-source" value="chatgpt">
+                    <label for="chatgpt">
+                        <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png" alt="ChatGPT" class="ai-icon">
+                        ChatGPT
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <div class="editor-container">
+            <div class="editor-box">
+                <div class="editor-header">
+                    <div class="editor-label" id="inputLabel">Input</div>
+                    <button class="btn-clear" id="clearBtn" onclick="clearAll()">Clear all</button>
+                </div>
+                <textarea id="input" placeholder="Paste your AI response here..."></textarea>
+            </div>
+
+            <div class="editor-box">
+                <div class="editor-header">
+                    <div class="editor-label">
+                        <span id="outputLabel">Output</span>
+                        <span class="pill" id="pillText">you can edit before copy if you want!</span>
+                    </div>
+                    <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">Copy</button>
+                </div>
+                <textarea id="output" placeholder="Formatted text will appear here..."></textarea>
+            </div>
+        </div>
+
+        <div class="about" id="about">
+            <strong>Why did I create this?</strong>
+            I was tired of copying stuff from AI chats to WhatsApp and having everything look like a mess lol
+        </div>
+
+        <div class="footer" id="footer">
+            Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "WhatsApp AI Copy/Paster Formatter",
+                subtitle: "Convert AI responses to WhatsApp format",
+                inputLabel: "Input",
+                outputLabel: "Output",
+                pillText: "you can edit before copy if you want!",
+                copyBtn: "Copy",
+                copiedBtn: "✓ Copied",
+                clearBtn: "Clear all",
+                inputPlaceholder: "Paste your AI response here...",
+                outputPlaceholder: "Formatted text will appear here...",
+                about: '<strong>Why did I create this?</strong> I was tired of copying stuff from AI chats to WhatsApp and having everything look like a mess lol',
+                footer: 'Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>'
+            },
+            pt: {
+                title: "Formatador de IA para WhatsApp",
+                subtitle: "Converta respostas de IA para formato WhatsApp",
+                inputLabel: "Entrada",
+                outputLabel: "Saída",
+                pillText: "você pode editar antes de copiar se quiser!",
+                copyBtn: "Copiar",
+                copiedBtn: "✓ Copiado",
+                clearBtn: "Limpar tudo",
+                inputPlaceholder: "Cole a resposta da IA aqui...",
+                outputPlaceholder: "O texto formatado vai aparecer aqui...",
+                about: '<strong>Por que criei isso?</strong> Tava de saco cheio de copiar coisas dos chats de IA pro WhatsApp e sair tudo mal formatado haha',
+                footer: 'Feito com 😤 por <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>'
+            }
+        };
+
+        // Auto-format on input change
+        document.getElementById('input').addEventListener('input', function() {
+            formatText();
+        });
+
+        // Update language
+        document.querySelectorAll('input[name="language"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                updateLanguage(this.value);
+            });
+        });
+
+        // Update label when AI source changes
+        document.querySelectorAll('input[name="ai-source"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                formatText();
+            });
+        });
+
+        function updateLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('inputLabel').textContent = t.inputLabel;
+            document.getElementById('outputLabel').textContent = t.outputLabel;
+            document.getElementById('pillText').textContent = t.pillText;
+            document.getElementById('copyBtn').textContent = t.copyBtn;
+            document.getElementById('clearBtn').textContent = t.clearBtn;
+            document.getElementById('input').placeholder = t.inputPlaceholder;
+            document.getElementById('output').placeholder = t.outputPlaceholder;
+            document.getElementById('footer').innerHTML = t.footer;
+            document.getElementById('about').innerHTML = t.about;
+        }
+
+        function formatText() {
+            let text = document.getElementById('input').value;
+            const aiSource = document.querySelector('input[name="ai-source"]:checked').value;
+
+            if (!text.trim()) {
+                document.getElementById('output').value = '';
+                return;
+            }
+
+            // Preserve code blocks temporarily to avoid breaking their content
+            const codeBlocks = [];
+            text = text.replace(/```[\s\S]*?```/g, function(match) {
+                codeBlocks.push(match);
+                return `__CODEBLOCK${codeBlocks.length - 1}__`;
+            });
+
+            // Apply transformation rules
+
+            // 1. Headers to Bold + Caps (with double line break before)
+            // Match ### first, then ##, then # to avoid conflicts
+            text = text.replace(/^### (.+)$/gm, '\n\n*$1*');
+            text = text.replace(/^## (.+)$/gm, '\n\n*$1*');
+            text = text.replace(/^# (.+)$/gm, '\n\n*$1*');
+
+            // Convert header text to uppercase
+            text = text.replace(/\n\n\*([^*]+)\*/g, function(match, p1) {
+                return '\n\n*' + p1.toUpperCase() + '*';
+            });
+
+            // 2. Triple asterisk (bold italic) - handle BEFORE double asterisk
+            text = text.replace(/\*\*\*(.+?)\*\*\*/g, '*_$1_*');
+
+            // 3. Bold Logic Fix: **text** to *text*
+            text = text.replace(/\*\*(.+?)\*\*/g, '*$1*');
+
+            // 4. List Cleanup: Convert * or - at start of line to bullet
+            // Handle both unordered lists and remove indentation
+            text = text.replace(/^[ \t]*[\*\-] (.+)$/gm, '• $1');
+
+            // 5. Numbered lists - keep them as is but clean formatting
+            text = text.replace(/^[ \t]*(\d+)\.\s+(.+)$/gm, '$1. $2');
+
+            // 6. Horizontal Rules: --- or *** to Unicode box drawing
+            text = text.replace(/^[\-]{3,}$/gm, '────────────────────');
+            text = text.replace(/^[\*]{3,}$/gm, '────────────────────');
+
+            // 7. Restore code blocks with proper formatting
+            text = text.replace(/__CODEBLOCK(\d+)__/g, function(match, index) {
+                let code = codeBlocks[parseInt(index)];
+                // Remove the backticks and format for WhatsApp
+                code = code.replace(/```[\w]*\n?/g, ''); // Remove opening ```
+                code = code.replace(/```$/g, ''); // Remove closing ```
+                // Add visual separator and monospace indicator
+                return '\n────────────────────\n' + code.trim() + '\n────────────────────';
+            });
+
+            // 8. Clean up extra whitespace but preserve intentional breaks
+            text = text.replace(/\n{4,}/g, '\n\n\n'); // Max 2 line breaks
+            text = text.trim();
+
+            document.getElementById('output').value = text;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            const copyBtn = document.getElementById('copyBtn');
+            const lang = document.querySelector('input[name="language"]:checked').value;
+            const t = translations[lang];
+
+            output.select();
+            output.setSelectionRange(0, 99999); // For mobile devices
+
+            navigator.clipboard.writeText(output.value).then(function() {
+                // Show feedback
+                copyBtn.textContent = t.copiedBtn;
+                copyBtn.classList.add('copied');
+
+                setTimeout(function() {
+                    copyBtn.textContent = t.copyBtn;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy. Please select and copy manually.');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('output').value = '';
+        }
+    </script>
+</body>
+</html>
