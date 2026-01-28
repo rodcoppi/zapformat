@@ -611,14 +611,33 @@
         // Track first format and increment counter
         let hasFormatted = false;
 
-        // Load initial count
-        fetch('https://api.countapi.xyz/get/zapformat/users')
+        // Load initial count - use info endpoint which auto-creates
+        fetch('https://api.countapi.xyz/info/zapformat/users')
             .then(res => res.json())
             .then(data => {
-                document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                if (data.value !== undefined) {
+                    document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                } else {
+                    // Key doesn't exist, create it
+                    return fetch('https://api.countapi.xyz/create?namespace=zapformat&key=users&value=0')
+                        .then(res => res.json())
+                        .then(() => {
+                            document.getElementById('usageCount').textContent = '0';
+                        });
+                }
             })
             .catch(() => {
-                document.getElementById('usageCount').textContent = '---';
+                // Try to get current value anyway
+                fetch('https://api.countapi.xyz/get/zapformat/users')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.value !== undefined) {
+                            document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('usageCount').textContent = '0';
+                    });
             });
 
         function incrementUsageCounter() {
@@ -627,7 +646,9 @@
                 fetch('https://api.countapi.xyz/hit/zapformat/users')
                     .then(res => res.json())
                     .then(data => {
-                        document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                        if (data.value !== undefined) {
+                            document.getElementById('usageCount').textContent = data.value.toLocaleString();
+                        }
                     })
                     .catch(() => {});
             }
