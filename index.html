@@ -610,10 +610,15 @@
 
         // Track first format and increment counter
         let hasFormatted = false;
-        const COUNTER_TOKEN = 'ut_cEcjRQq1SJEH0P4bE8PzfD1LQI3V9qH43CzpEa6V';
+        const COUNTER_API_TOKEN = 'ut_cEcjRQq1SJEH0P4bE8PzfD1LQI3V9qH43CzpEa6V';
+        const COUNTER_ENDPOINT = 'https://api.counterapi.dev/v2/rodrigo-coppis-team-2665/first-counter-2665';
 
         // Load initial count
-        fetch(`https://api.countapi.io/get/${COUNTER_TOKEN}`)
+        fetch(COUNTER_ENDPOINT, {
+            headers: {
+                'Authorization': `Bearer ${COUNTER_API_TOKEN}`
+            }
+        })
             .then(res => res.json())
             .then(data => {
                 if (data.count !== undefined) {
@@ -627,7 +632,12 @@
         function incrementUsageCounter() {
             if (!hasFormatted) {
                 hasFormatted = true;
-                fetch(`https://api.countapi.io/hit/${COUNTER_TOKEN}`)
+                fetch(`${COUNTER_ENDPOINT}/up`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${COUNTER_API_TOKEN}`
+                    }
+                })
                     .then(res => res.json())
                     .then(data => {
                         if (data.count !== undefined) {
