@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zapformat - WhatsApp AI Copy/Paster Formatter</title>
-    <meta name="description" content="Convert AI responses from Gemini and ChatGPT to WhatsApp format. Clean, fast, and free formatter tool.">
+    <meta name="description" content="Fix the visual mess when copying from Gemini or ChatGPT to WhatsApp. Paste your AI response and get a clean, WhatsApp-ready version instantly.">
     <meta name="keywords" content="whatsapp formatter, ai to whatsapp, gemini to whatsapp, chatgpt to whatsapp, markdown formatter">
     <meta name="author" content="Rodrigo Coppi">
 
@@ -12,13 +12,13 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://zapformat.xyz/">
     <meta property="og:title" content="Zapformat - WhatsApp AI Formatter">
-    <meta property="og:description" content="Convert AI responses to WhatsApp format instantly. Support for Gemini and ChatGPT.">
+    <meta property="og:description" content="Fix the visual mess when copying from Gemini or ChatGPT to WhatsApp. Get clean, formatted text instantly.">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary">
     <meta property="twitter:url" content="https://zapformat.xyz/">
     <meta property="twitter:title" content="Zapformat - WhatsApp AI Formatter">
-    <meta property="twitter:description" content="Convert AI responses to WhatsApp format instantly. Support for Gemini and ChatGPT.">
+    <meta property="twitter:description" content="Fix the visual mess when copying from Gemini or ChatGPT to WhatsApp. Get clean, formatted text instantly.">
 
     <style>
         * {
@@ -64,6 +64,8 @@
         .subtitle {
             color: #888;
             font-size: 0.9rem;
+            max-width: 650px;
+            line-height: 1.6;
         }
 
         .lang-selector {
@@ -95,29 +97,30 @@
         }
 
         .ai-selector {
-            display: flex;
-            gap: 8px;
+            position: relative;
+            display: inline-flex;
             background: #1a1a1a;
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid #2a2a2a;
         }
 
-        .ai-option input[type="radio"] {
+        input[type="radio"][name="ai-source"] {
             display: none;
         }
 
-        .ai-option label {
-            padding: 8px 18px;
+        .ai-option {
+            position: relative;
+            z-index: 2;
+            padding: 8px 20px;
             cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            border-radius: 6px;
-            color: #888;
-            user-select: none;
+            transition: color 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 0.9rem;
+            color: #888;
+            user-select: none;
         }
 
         .ai-icon {
@@ -126,8 +129,28 @@
             border-radius: 4px;
         }
 
-        .ai-option input[type="radio"]:checked + label {
+        .ai-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
             background: #fff;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        input[type="radio"]#chatgpt:checked ~ .ai-slider {
+            left: calc(50%);
+        }
+
+        input[type="radio"]#gemini:checked ~ label[for="gemini"] {
+            color: #000;
+            font-weight: 600;
+        }
+
+        input[type="radio"]#chatgpt:checked ~ label[for="chatgpt"] {
             color: #000;
             font-weight: 600;
         }
@@ -236,7 +259,7 @@
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-size: 13px;
             line-height: 1.6;
-            resize: none;
+            resize: vertical;
         }
 
         textarea:focus {
@@ -273,7 +296,19 @@
             padding-top: 20px;
             border-top: 1px solid #1a1a1a;
             color: #555;
+            font-size: 0.9rem;
+        }
+
+        .footer-main {
             font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.85rem;
         }
 
         .footer a {
@@ -286,6 +321,11 @@
         .footer a:hover {
             color: #888;
         }
+
+        .opensource-badge {
+            color: #888;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -294,7 +334,7 @@
             <div class="header-top">
                 <div class="header-left">
                     <h1 id="title">Zapformat</h1>
-                    <p class="subtitle" id="subtitle">WhatsApp AI Copy/Paster Formatter - Convert AI responses to WhatsApp format</p>
+                    <p class="subtitle" id="subtitle">Ever tried copying text from Gemini or ChatGPT to WhatsApp and noticed it comes out as a visual mess? Yeah, me too! That's why I built this—paste your AI response here as-is, and copy the clean, WhatsApp-ready version.</p>
                 </div>
                 <div class="lang-selector">
                     <div class="lang-option">
@@ -309,20 +349,20 @@
             </div>
 
             <div class="ai-selector">
-                <div class="ai-option">
-                    <input type="radio" id="gemini" name="ai-source" value="gemini" checked>
-                    <label for="gemini">
-                        <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini" class="ai-icon">
-                        Gemini
-                    </label>
-                </div>
-                <div class="ai-option">
-                    <input type="radio" id="chatgpt" name="ai-source" value="chatgpt">
-                    <label for="chatgpt">
-                        <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png" alt="ChatGPT" class="ai-icon">
-                        ChatGPT
-                    </label>
-                </div>
+                <input type="radio" id="gemini" name="ai-source" value="gemini" checked>
+                <input type="radio" id="chatgpt" name="ai-source" value="chatgpt">
+
+                <div class="ai-slider"></div>
+
+                <label for="gemini" class="ai-option">
+                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini" class="ai-icon">
+                    Gemini
+                </label>
+
+                <label for="chatgpt" class="ai-option">
+                    <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png" alt="ChatGPT" class="ai-icon">
+                    ChatGPT
+                </label>
             </div>
         </header>
 
@@ -352,8 +392,14 @@
             I was tired of copying stuff from AI chats to WhatsApp and having everything look like a mess lol
         </div>
 
-        <div class="footer" id="footer">
-            Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>
+        <div class="footer">
+            <div class="footer-main" id="footerMain">
+                Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>
+            </div>
+            <div class="footer-links">
+                <span class="opensource-badge" id="opensourceBadge">Open Source</span>
+                <a href="https://github.com/rodcoppi/zapformat" target="_blank" rel="noopener noreferrer" id="githubLink">GitHub</a>
+            </div>
         </div>
     </div>
 
@@ -361,7 +407,7 @@
         const translations = {
             en: {
                 title: "Zapformat",
-                subtitle: "WhatsApp AI Copy/Paster Formatter - Convert AI responses to WhatsApp format",
+                subtitle: "Ever tried copying text from Gemini or ChatGPT to WhatsApp and noticed it comes out as a visual mess? Yeah, me too! That's why I built this—paste your AI response here as-is, and copy the clean, WhatsApp-ready version.",
                 inputLabel: "Input",
                 outputLabel: "Output",
                 pillText: "you can edit before copy if you want!",
@@ -371,11 +417,13 @@
                 inputPlaceholder: "Paste your AI response here...",
                 outputPlaceholder: "Formatted text will appear here...",
                 about: '<strong>Why did I create this?</strong> I was tired of copying stuff from AI chats to WhatsApp and having everything look like a mess lol',
-                footer: 'Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>'
+                footerMain: 'Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>',
+                opensourceBadge: 'Open Source',
+                githubLink: 'GitHub'
             },
             pt: {
                 title: "Zapformat",
-                subtitle: "Formatador de IA para WhatsApp - Converta respostas de IA para formato WhatsApp",
+                subtitle: "Já tentou copiar um texto do Gemini ou ChatGPT pro WhatsApp e percebeu que sai uma bagunça visual? Pois é, eu também! Por isso criei essa solução—cole o conteúdo aqui do jeito que vem e copie a versão formatada para o WhatsApp.",
                 inputLabel: "Entrada",
                 outputLabel: "Saída",
                 pillText: "você pode editar antes de copiar se quiser!",
@@ -385,7 +433,9 @@
                 inputPlaceholder: "Cole a resposta da IA aqui...",
                 outputPlaceholder: "O texto formatado vai aparecer aqui...",
                 about: '<strong>Por que criei isso?</strong> Tava de saco cheio de copiar coisas dos chats de IA pro WhatsApp e sair tudo mal formatado haha',
-                footer: 'Feito com 😤 por <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>'
+                footerMain: 'Feito com 😤 por <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>',
+                opensourceBadge: 'Código Aberto',
+                githubLink: 'GitHub'
             }
         };
 
@@ -419,7 +469,9 @@
             document.getElementById('clearBtn').textContent = t.clearBtn;
             document.getElementById('input').placeholder = t.inputPlaceholder;
             document.getElementById('output').placeholder = t.outputPlaceholder;
-            document.getElementById('footer').innerHTML = t.footer;
+            document.getElementById('footerMain').innerHTML = t.footerMain;
+            document.getElementById('opensourceBadge').textContent = t.opensourceBadge;
+            document.getElementById('githubLink').textContent = t.githubLink;
             document.getElementById('about').innerHTML = t.about;
         }
 
