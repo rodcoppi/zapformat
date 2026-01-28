@@ -59,6 +59,9 @@
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .subtitle {
@@ -309,6 +312,32 @@
             justify-content: center;
             gap: 20px;
             font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .bookmark-btn {
+            background: transparent;
+            border: 1px solid #3a3a3a;
+            color: #888;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .bookmark-btn:hover {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #4a4a4a;
+        }
+
+        @media (max-width: 768px) {
+            .bookmark-btn {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
         }
 
         .footer a {
@@ -333,7 +362,10 @@
         <header>
             <div class="header-top">
                 <div class="header-left">
-                    <h1 id="title">Zapformat</h1>
+                    <h1>
+                        <span id="title">Zapformat</span>
+                        <button class="bookmark-btn" id="bookmarkBtn" onclick="showBookmarkInstructions()">⭐ Bookmark</button>
+                    </h1>
                     <p class="subtitle" id="subtitle">Ever tried copying text from Gemini or ChatGPT to WhatsApp and noticed it comes out as a visual mess? Yeah, me too! That's why I built this—paste your AI response here as-is, and copy the clean, WhatsApp-ready version.</p>
                 </div>
                 <div class="lang-selector">
@@ -419,7 +451,9 @@
                 about: '<strong>Why did I create this?</strong> I was tired of copying stuff from AI chats to WhatsApp and having everything look like a mess lol',
                 footerMain: 'Built with 😤 by <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>',
                 opensourceBadge: 'Open Source',
-                githubLink: 'GitHub'
+                githubLink: 'GitHub',
+                bookmarkBtn: '⭐ Bookmark',
+                bookmarkMsg: 'Press Ctrl+D (Windows/Linux) or Cmd+D (Mac) to bookmark this page!'
             },
             pt: {
                 title: "Zapformat",
@@ -435,7 +469,9 @@
                 about: '<strong>Por que criei isso?</strong> Tava de saco cheio de copiar coisas dos chats de IA pro WhatsApp e sair tudo mal formatado haha',
                 footerMain: 'Feito com 😤 por <a href="https://www.linkedin.com/in/rodrigo-coppi/" target="_blank" rel="noopener noreferrer">Rodrigo Coppi</a>',
                 opensourceBadge: 'Código Aberto',
-                githubLink: 'GitHub'
+                githubLink: 'GitHub',
+                bookmarkBtn: '⭐ Favoritar',
+                bookmarkMsg: 'Pressione Ctrl+D (Windows/Linux) ou Cmd+D (Mac) para adicionar aos favoritos!'
             }
         };
 
@@ -472,7 +508,14 @@
             document.getElementById('footerMain').innerHTML = t.footerMain;
             document.getElementById('opensourceBadge').textContent = t.opensourceBadge;
             document.getElementById('githubLink').textContent = t.githubLink;
+            document.getElementById('bookmarkBtn').textContent = t.bookmarkBtn;
             document.getElementById('about').innerHTML = t.about;
+        }
+
+        function showBookmarkInstructions() {
+            const lang = document.querySelector('input[name="language"]:checked').value;
+            const t = translations[lang];
+            alert(t.bookmarkMsg);
         }
 
         function formatText() {
